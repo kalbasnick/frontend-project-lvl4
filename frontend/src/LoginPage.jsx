@@ -19,11 +19,15 @@ const signUpSchema = Yup.object().shape({
 const LoginPage = () => {
   const { push } = useHistory();
   const auth = useAuth();
+  const inputRef = useRef(null);
   const [validation, setValidation] = useState(null);
+
+  useEffect(() => {
+    inputRef.current.focus();
+  }, []);
 
   const invalidFeedbackClasses = cn("invalid-tooltip", { "d-block": validation === 'invalid' });
   const inputsClasses = cn("form-control", { "is-invalid": validation === 'invalid' });
-
 
   const f = useFormik({
     initialValues: {
@@ -40,6 +44,7 @@ const LoginPage = () => {
       await axios.post('/api/v1/login', authData).then((response) => {
         const userToken = JSON.stringify({ token: response.data.token });
         localStorage.setItem('userId', userToken);
+        localStorage.setItem('username', authData.username);
         auth.logIn();
         setValidation('valid');
         push('/');
@@ -56,7 +61,7 @@ const LoginPage = () => {
     <>
       <form onSubmit={f.handleSubmit}>
         <Form.Group className="form-floating mb-3">
-          <input placeholder="Ваш ник" name="username" autoComplete="username" required id="username" className={inputsClasses} onChange={f.handleChange} value={f.values.username} />
+          <input ref={inputRef} placeholder="Ваш ник" name="username" autoComplete="username" required id="username" className={inputsClasses} onChange={f.handleChange} value={f.values.username} />
         </Form.Group>
         <Form.Group className="form-floating mb-3">
           <input placeholder="Пароль" name="password" autoComplete="password" required id="password" className={inputsClasses} onChange={f.handleChange} value={f.values.password} />

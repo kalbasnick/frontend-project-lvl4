@@ -4,12 +4,15 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
+import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginPage from "./LoginPage";
 import HomePage from "./HomePage";
 import AuthContext from "./contexts/index.jsx";
-import useAuth from "./hooks/index.jsx";
+// import useAuth from "./hooks/index.jsx";
+
+import store from './slices/index.js';
 
 const AuthProvider = ({ children }) => {
   const [loggedId, setLoggedIn] = useState(false);
@@ -33,7 +36,9 @@ export default function App() {
       <Router>
       <Switch>
           <Route exact path="/">
-            <HomePage />
+            <Provider store={store}>
+              <HomePage />
+            </Provider>
           </Route>
           <Route path="/login">
             <LoginPage />
