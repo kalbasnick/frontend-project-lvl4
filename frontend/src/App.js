@@ -8,9 +8,11 @@ import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginPage from "./LoginPage";
-import HomePage from "./HomePage";
+import HomePage from "./ChatPage";
 import AuthContext from "./contexts/index.jsx";
 // import useAuth from "./hooks/index.jsx";
+
+import io from 'socket.io-client';
 
 import store from './slices/index.js';
 
@@ -30,6 +32,8 @@ const AuthProvider = ({ children }) => {
   );
 };
 
+const socket = new io();
+
 export default function App() {
   return (
     <AuthProvider>
@@ -37,7 +41,7 @@ export default function App() {
       <Switch>
           <Route exact path="/">
             <Provider store={store}>
-              <HomePage />
+              <HomePage socket={socket} />
             </Provider>
           </Route>
           <Route path="/login">

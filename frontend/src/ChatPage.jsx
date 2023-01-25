@@ -11,10 +11,12 @@ import Messages from './components/Messages';
 import { actions as channelsActions } from './slices/channelsSlice';
 import { actions as messagesActions } from './slices/messagesSlice';
 
-const HomePage = () => {
+const HomePage = ({ socket }) => {
   const { push } = useHistory();
   const userData = JSON.parse(localStorage.getItem('userId'));
   const inputRef = useRef(null);
+
+  const dispatch = useDispatch();
 
   useEffect(() => {
     if (!userData) {
@@ -22,6 +24,16 @@ const HomePage = () => {
     }
 
     inputRef.current.focus();
+
+    socket.on('connect', () => {
+      socket.on('newMessage', (payload) => {
+        dispatch(messagesActions.addMessage(payload));
+      });
+      console.log(socket);
+      if (!socket.connected) {
+        console.log('dsconnected!');
+      }
+    });
 
     const fetchData = async () => {
       const { data } = await axios.get('/api/v1/data', {
@@ -38,11 +50,10 @@ const HomePage = () => {
     };
 
     fetchData();
+    return;
   }, []);
 
   const { currentChannelId } = useSelector((state) => state.channelsInfo);
-
-  const dispatch = useDispatch();
 
   const f = useFormik({
     initialValues: {
@@ -52,11 +63,7 @@ const HomePage = () => {
       channelId: currentChannelId,
     },
     onSubmit: (values) => {
-      dispatch(messagesActions.addMessage({
-        ...values,
-        id: _.uniqueId(),
-        channelId: currentChannelId,
-      }));
+      socket.emit('newMessage', { body: values.body, channelId: currentChannelId, username: localStorage.username });
       f.handleReset();
     },
   });
