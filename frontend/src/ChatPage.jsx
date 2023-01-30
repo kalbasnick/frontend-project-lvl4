@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import axios from 'axios';
@@ -8,10 +8,22 @@ import _ from 'lodash';
 import Channels from './components/Channels';
 import Messages from './components/Messages';
 
+import getModal from './modals/index.js';
+
 import { actions as channelsActions } from './slices/channelsSlice';
 import { actions as messagesActions } from './slices/messagesSlice';
 
-const HomePage = ({ socket }) => {
+const renderModal = ({ modalInfo, hideModal }) => {
+  if (!modalInfo.type) {
+    return null;
+  }
+
+  const Component = getModal(modalInfo.type);
+  return <Component modalInfo={modalInfo} onHide={hideModal}/>
+};
+
+
+const ChatPage = ({ socket }) => {
   const { push } = useHistory();
   const userData = JSON.parse(localStorage.getItem('userId'));
   const inputRef = useRef(null);
@@ -67,10 +79,20 @@ const HomePage = ({ socket }) => {
       f.handleReset();
     },
   });
+
+  const [modalInfo, setModalInfo] = useState({ type: null });
+  const hideModal = () => setModalInfo({ type: null });
+  const showModal = (type) => setModalInfo({ type });
+
   
   return (
     <div className='container h-100 my-4 overflow-hidden rounded shadow'>
       <div className='row h-100 bg-white flex-md-row'>
+        <div>
+          <span>Каналы</span>
+          <button onClick={() => showModal('adding')}>+</button>
+          {renderModal({ modalInfo, hideModal })}
+        </div>
         <div className='col-4 col-md-2 border-end pt-5 px-0 bg-light'>
           <Channels />
         </div>
@@ -93,4 +115,4 @@ const HomePage = ({ socket }) => {
   );
 };
 
-export default HomePage;
+export default ChatPage;

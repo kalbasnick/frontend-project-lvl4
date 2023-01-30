@@ -8,7 +8,7 @@ import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginPage from "./LoginPage";
-import HomePage from "./ChatPage";
+import ChatPage from "./ChatPage";
 import AuthContext from "./contexts/index.jsx";
 // import useAuth from "./hooks/index.jsx";
 
@@ -41,7 +41,7 @@ export default function App() {
       <Switch>
           <Route exact path="/">
             <Provider store={store}>
-              <HomePage socket={socket} />
+              <ChatPage socket={socket} />
             </Provider>
           </Route>
           <Route path="/login">
