@@ -5,13 +5,13 @@ import axios from 'axios';
 import { useFormik } from 'formik';
 import _ from 'lodash';
 
-import Channels from './components/Channels';
-import Messages from './components/Messages';
+import Channels from '../components/Channels';
+import Messages from '../components/Messages';
 
-import getModal from './modals/index.js';
+import getModal from '../modals/index.js';
 
-import { actions as channelsActions } from './slices/channelsSlice';
-import { actions as messagesActions } from './slices/messagesSlice';
+import { actions as channelsActions } from '../slices/channelsSlice';
+import { actions as messagesActions } from '../slices/messagesSlice';
 
 const renderModal = ({ modalInfo, hideModal }) => {
   if (!modalInfo.type) {

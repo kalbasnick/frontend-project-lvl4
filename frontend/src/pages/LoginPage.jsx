@@ -7,7 +7,7 @@ import axios from 'axios';
 import cn from 'classnames';
 
 import { useHistory } from 'react-router-dom';
-import useAuth from './hooks/index.jsx';
+import useAuth from '../hooks/index.jsx';
 
 const signUpSchema = Yup.object().shape({
   username: Yup.string()

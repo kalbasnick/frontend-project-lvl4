@@ -7,8 +7,8 @@ import {
 import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-import LoginPage from "./LoginPage";
-import ChatPage from "./ChatPage";
+import LoginPage from "./pages/LoginPage";
+import ChatPage from "./pages/ChatPage";
 import AuthContext from "./contexts/index.jsx";
 // import useAuth from "./hooks/index.jsx";
 
