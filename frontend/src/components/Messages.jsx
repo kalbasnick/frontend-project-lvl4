@@ -8,7 +8,7 @@ const Messages = () => {
   return (
     <>
       {messages.map(({id, username, body, channelId}) => {
-        if (currentChannelId === channelId ) {
+        if (currentChannelId === channelId) {
           return (
             <div key={id} className='text-break mb-2'>
              <b>{username}</b>
@@ -17,6 +17,8 @@ const Messages = () => {
             </div>
            );
         }
+
+        return null;
       })}
     </>
   )

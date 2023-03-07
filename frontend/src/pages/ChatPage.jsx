@@ -12,23 +12,58 @@ import getModal from '../modals/index.js';
 
 import { actions as channelsActions } from '../slices/channelsSlice';
 import { actions as messagesActions } from '../slices/messagesSlice';
+import { actions as modalsActions } from '../slices/modalsSlice';
 
-const renderModal = ({ modalInfo, hideModal }) => {
-  if (!modalInfo.type) {
+const renderModal = ({ type, extra, hideModal, handleChannelAction, channels }) => {
+  if (!type) {
     return null;
   }
 
-  const Component = getModal(modalInfo.type);
-  return <Component modalInfo={modalInfo} onHide={hideModal}/>
+  const Component = getModal(type);
+  return <Component modalInfo={type} onHide={hideModal} handleChannelAction={handleChannelAction(type, extra)} extra={extra} channels={channels}/>
 };
 
+const generateIdForChannels = (data) => data.map((channels) => ({ ...channels, id: Number(_.uniqueId()) }));
+const getDefaultChannelId = (channels) => {
+  if (!channels) {
+    return null;
+  }
+
+  return channels[0].id;
+};
 
 const ChatPage = ({ socket }) => {
   const { push } = useHistory();
   const userData = JSON.parse(localStorage.getItem('userId'));
   const inputRef = useRef(null);
 
+  const { channels, currentChannelId } = useSelector((state) => state.channelsInfo);
+
   const dispatch = useDispatch();
+
+  const handleChannelAction = (type, extra) => (props) => {
+    switch (type) {
+      case 'addChannel':
+        dispatch(channelsActions.setCurrentChannel(props.id));
+        dispatch(modalsActions.closeModal());
+        dispatch(channelsActions.addChannel(props));
+        return;
+      case 'removeChannel':
+        dispatch(modalsActions.closeModal());
+        dispatch(channelsActions.removeChannel(extra));
+        socket.emit('removeChannel', { id: extra.channelId });
+        return;
+      case 'renameChannel':
+        dispatch(modalsActions.closeModal());
+        dispatch(channelsActions.renameChannel({
+          ...extra,
+          ...props,
+        }));
+        return;
+      default:
+        throw new Error(`${type} is unknown type!`);
+    }
+  };
 
   useEffect(() => {
     if (!userData) {
@@ -41,10 +76,6 @@ const ChatPage = ({ socket }) => {
       socket.on('newMessage', (payload) => {
         dispatch(messagesActions.addMessage(payload));
       });
-      console.log(socket);
-      if (!socket.connected) {
-        console.log('dsconnected!');
-      }
     });
 
     const fetchData = async () => {
@@ -54,18 +85,17 @@ const ChatPage = ({ socket }) => {
         }
       });
 
+      const channelsWithGeneratedId = generateIdForChannels(data.channels);
+      
       dispatch(channelsActions.setInitialState({
-        channels: data.channels,
+        channels: channelsWithGeneratedId,
         messages: [],
-        currentChannelId: 1,
+        currentChannelId: getDefaultChannelId(channelsWithGeneratedId),
       }));
     };
 
     fetchData();
-    return;
   }, []);
-
-  const { currentChannelId } = useSelector((state) => state.channelsInfo);
 
   const f = useFormik({
     initialValues: {
@@ -75,14 +105,27 @@ const ChatPage = ({ socket }) => {
       channelId: currentChannelId,
     },
     onSubmit: (values) => {
-      socket.emit('newMessage', { body: values.body, channelId: currentChannelId, username: localStorage.username });
+      socket.emit('newMessage', {
+        body: values.body,
+        channelId: currentChannelId,
+        username: localStorage.username,
+      });
       f.handleReset();
     },
   });
 
-  const [modalInfo, setModalInfo] = useState({ type: null });
-  const hideModal = () => setModalInfo({ type: null });
-  const showModal = (type) => setModalInfo({ type });
+  const { type, extra } = useSelector((state) => state.modal);
+
+  const hideModal = () => {
+    dispatch(modalsActions.closeModal());
+  };
+
+  const showModal = (type) => {
+    dispatch(modalsActions.openModal({ 
+      type,
+      extra: null,
+    }));
+  };
 
   
   return (
@@ -90,17 +133,17 @@ const ChatPage = ({ socket }) => {
       <div className='row h-100 bg-white flex-md-row'>
         <div>
           <span>Каналы</span>
-          <button onClick={() => showModal('adding')}>+</button>
-          {renderModal({ modalInfo, hideModal })}
+          <button onClick={() => showModal('addChannel')}>+</button>
         </div>
         <div className='col-4 col-md-2 border-end pt-5 px-0 bg-light'>
           <Channels />
         </div>
+        {renderModal({ type, extra, hideModal, showModal, handleChannelAction, channels })}
         <div className='col p-0 h-100'>
           <div className='d-flex flex-column h-100'>
             <div id="messages-box" className='chat-messages overflow-auto px-5'>
               <Messages />
-            </div>  
+            </div>
             <div className='mt-auto px-5 py-3'>
               <form noValidate className='py-1 border rounded-2' onSubmit={f.handleSubmit}>
                   <div className='input-group has-validation'>

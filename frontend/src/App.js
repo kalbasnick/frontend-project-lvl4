@@ -4,7 +4,6 @@ import {
   Switch,
   Route,
 } from "react-router-dom";
-import { Provider } from 'react-redux';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 import LoginPage from "./pages/LoginPage";
@@ -13,8 +12,6 @@ import AuthContext from "./contexts/index.jsx";
 // import useAuth from "./hooks/index.jsx";
 
 import io from 'socket.io-client';
-
-import store from './slices/index.js';
 
 const AuthProvider = ({ children }) => {
   const [loggedId, setLoggedIn] = useState(false);
@@ -40,9 +37,7 @@ export default function App() {
       <Router>
       <Switch>
           <Route exact path="/">
-            <Provider store={store}>
-              <ChatPage socket={socket} />
-            </Provider>
+            <ChatPage socket={socket} />
           </Route>
           <Route path="/login">
             <LoginPage />

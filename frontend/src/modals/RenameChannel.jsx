@@ -2,7 +2,6 @@ import React, { useEffect, useRef } from "react";
 import { useFormik } from "formik";
 import { Modal, Form, FormGroup, FormControl, Button } from 'react-bootstrap';
 import * as Yup from 'yup';
-import _ from 'lodash';
 
 const generateValidationSchema = (itmes) => Yup.object().shape({
   body: Yup.string()
@@ -12,35 +11,36 @@ const generateValidationSchema = (itmes) => Yup.object().shape({
     .notOneOf(itmes, 'Должно быть уникальным'),
 });
 
-const AddChannel = (props) => {
-  const { onHide, handleChannelAction, channels } = props;
+const RenameChannel = (props) => {
+  const { onHide, handleChannelAction, channels, extra } = props;
+  const channelName = channels
+  .filter(({ id }) => id === extra.channelId)
+  .map(({ name }) => name)
+  [0];
 
   const channelsNames = channels.map(({ name }) => name);
   const addChannelSchema = generateValidationSchema(channelsNames);
 
   const f = useFormik({ 
-    initialValues: { body: '' },
+    initialValues: { body: channelName },
     validateOnChange: false,
     validateOnBlur: false,
     validationSchema: addChannelSchema,
-    onSubmit: (values) => handleChannelAction({
-      id: Number(_.uniqueId()),
-      name: values.body,
-      removable: true,
-    }),
+    onSubmit: (values) => handleChannelAction({ channelName: values.body }),
   });
 
   const inputRef = useRef();
 
   useEffect(() => {
     inputRef.current.focus();
+    inputRef.current.select();
   }, []);
 
   return (
     <>
       <Modal show>
         <Modal.Header closeButton onHide={onHide}>
-          <Modal.Title>Добавить канал</Modal.Title>
+          <Modal.Title>Переименовать канал</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form onSubmit={f.handleSubmit}>
@@ -50,6 +50,7 @@ const AddChannel = (props) => {
                 onChange={f.handleChange}
                 onBlur={f.handleBlur}
                 values={f.values.body}
+                value={f.values.body}
                 data-testid="input-body"
                 name="body"
                 isInvalid={f.errors.body && f.touched.body}
@@ -71,4 +72,4 @@ const AddChannel = (props) => {
   );
 };
 
-export default AddChannel;
+export default RenameChannel;

@@ -7,7 +7,7 @@ import axios from 'axios';
 import cn from 'classnames';
 
 import { useHistory } from 'react-router-dom';
-import useAuth from '../hooks/index.jsx';
+import useAuth from '../hooks/index.js';
 
 const signUpSchema = Yup.object().shape({
   username: Yup.string()
@@ -27,7 +27,7 @@ const LoginPage = () => {
   }, []);
 
   const invalidFeedbackClasses = cn("invalid-tooltip", { "d-block": validation === 'invalid' });
-  const inputsClasses = cn("form-control", { "is-invalid": validation === 'invalid' });
+  const inputClasses = cn("form-control", { "is-invalid": validation === 'invalid' });
 
   const f = useFormik({
     initialValues: {
@@ -61,10 +61,27 @@ const LoginPage = () => {
     <>
       <form onSubmit={f.handleSubmit}>
         <Form.Group className="form-floating mb-3">
-          <input ref={inputRef} placeholder="Ваш ник" name="username" autoComplete="username" required id="username" className={inputsClasses} onChange={f.handleChange} value={f.values.username} />
+          <input 
+            ref={inputRef}
+            placeholder="Ваш ник"
+            name="username"
+            autoComplete="username"
+            required id="username"
+            className={inputClasses}
+            onChange={f.handleChange}
+            value={f.values.username}
+          />
         </Form.Group>
         <Form.Group className="form-floating mb-3">
-          <input placeholder="Пароль" name="password" autoComplete="password" required id="password" className={inputsClasses} onChange={f.handleChange} value={f.values.password} />
+          <input 
+            placeholder="Пароль"
+            name="password"
+            autoComplete="password"
+            required id="password"
+            className={inputClasses}
+            onChange={f.handleChange}
+            value={f.values.password}
+          />
           <div className={invalidFeedbackClasses}>Неверные имя пользователя или пароль</div>
         </Form.Group>
         <Button type="submit" className="w-100 mb-3">Войти</Button>
